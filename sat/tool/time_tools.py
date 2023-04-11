@@ -1,14 +1,19 @@
 from skyfield.api import load
 from datetime import datetime
 import numpy as np
-
-epochTimeStr = '2023-2-24 11:30:00'  # 输入仿真的时间格式
+import arrow
 
 def get_time_from_iso(iso_str):
     return datetime.strptime(iso_str, '%Y-%m-%dT%H:%M:%SZ')
 
 def get_time_from_std(std_str):
     return datetime.strptime(std_str, '%Y-%m-%d %H:%M:%S')
+
+def get_iso_from_std(std_str):
+    return datetime.strptime(std_str, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%dT%H:%M:%SZ')
+
+def get_std_from_iso(iso_str):
+    return datetime.strptime(iso_str, '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S')
 
 def get_ts_from_time(dt):
     ts = load.timescale()
@@ -32,6 +37,23 @@ def get_ts_array_from_std(start_std : str, end_std : str, timescale):
 
     return ts_array
 
+def get_ts_array_from_iso(start_iso: str, end_iso: str, timescale):
+    frame = 'second'
+    if timescale >= 1000:
+        timescale = timescale // 1000
+    else:
+        frame = 'microsecond'
+        timescale = timescale * 1000
+
+    start_arrow = arrow.get(start_iso)
+    end_arrow = arrow.get(end_iso)
+
+    ts = load.timescale()
+
+    ts_array = ts.from_datetimes(
+        [s[0] for s in arrow.Arrow.interval(frame, start_arrow, end_arrow, timescale, exact=True)])
+
+    return ts_array
 
 def get_julian_from_std(std_str):
     """得到julian的JDN和分数, JD = jd + fr"""

@@ -1,9 +1,8 @@
 import math
 import os.path
-import time
 from datetime import datetime
+import arrow
 
-import yaml
 from sgp4.api import Satrec, WGS72
 from sgp4 import exporter
 from skyfield.api import EarthSatellite, load
@@ -111,7 +110,7 @@ def auto_get_sat_dict(file_path='../conf.yaml'):
     :param file_path:
     :return: {'1_1': Satellite}: dict
     """
-    print(f"{datetime.now().isoformat()}    开始生成星座")
+    print(f"{arrow.now().isoformat()}    开始生成星座")
     result = get_yaml(file_path)
 
     jd, fr = get_julian_from_time(result['epoch'])
@@ -139,7 +138,7 @@ def save_tles_to_file(sat_dict, constellation_name, dir_path):
         os.makedirs(dir_path)
     file_path = dir_path + file_name + '.txt'
 
-    print(f"{datetime.now().isoformat()}    正在保存星座TLE文件")
+    print(f"{arrow.now().isoformat()}    正在保存星座TLE文件")
 
     file = ''
     for key, value in sat_dict.items():

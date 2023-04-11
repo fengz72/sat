@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 import math
+import arrow
 
 import skyfield.api
 from skyfield.api import load
@@ -204,7 +205,7 @@ def calc_txt(sat_path, gs_path, start_str, end_str, timescale, dir_path):
             #         json.dump(data, f)
 
 def calc_shortest_path(graph : nx.Graph, source, dest, t:skyfield.api.Time) -> dict:
-    print(f'{datetime.now().isoformat()}  正在计算最短路径: {source.name} to {dest.name}, {t.utc_iso()}')
+    print(f'{arrow.now().isoformat()}  正在计算最短路径: {source.name} to {dest.name}, {t.utc_iso()}')
     result = {
         "time": f'{t.utc_iso()}',
         "path": [],
@@ -228,43 +229,38 @@ def calc_shortest_path(graph : nx.Graph, source, dest, t:skyfield.api.Time) -> d
 
     return result
 
-def calc_all(conf_path = '../conf.yaml'):
-    # 得到文件保存路径
-    time_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    dir_path = f'../data/{time_str}/'
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-
+def calc_all(dir_path, conf_path = '../conf.yaml'):
     # 根据配置文件, 生成卫星和地面站
     sat_dict = auto_get_sat_dict(conf_path)
     gs_list = auto_get_gs_list(sat_dict, conf_path)
 
     conf = get_yaml(conf_path)
-    start_std = conf['start']
-    end_std = conf['end']
-    timescale = conf['timescale']
+    start_iso = conf['start']
+    end_iso = conf['end']
     name = conf['name']
     tle_save = conf['tle_save']
 
+    ts = load.timescale()
     # 保存tle文件
     if tle_save:
         save_tles_to_file(sat_dict, name, dir_path)
 
-    ts_array = get_ts_array_from_std(start_std, end_std, timescale) # 根据时间间隔得到时间数组
+    start_arrow = arrow.get(start_iso)
+    end_arrow = arrow.get(end_iso)
+    arrow_array = arrow.Arrow.range('second', start_arrow, end_arrow) # 根据时间间隔得到时间数组
     # 计算第一个地面站到其他地面站的最短路径
     for gs in gs_list[1:]:
         filename = f'{gs_list[0].name} to {gs.name}.json'
         result = []
-        for ts in ts_array:
-            g = create_topo(sat_dict, gs_list, ts)
-            temp = calc_shortest_path(g, gs_list[0], gs, ts)
+        for a in arrow_array:
+            t = ts.from_datetime(a)
+            g = create_topo(sat_dict, gs_list, t)
+            temp = calc_shortest_path(g, gs_list[0], gs, t)
             result.append(temp)
         #保存数据到文件
-        print(f'{datetime.now().isoformat()}  将计算结果写入文件: {gs_list[0].name} to {gs.name}')
+        print(f'{arrow.now().isoformat()}  将计算结果写入文件: {gs_list[0].name} to {gs.name}')
         with open(dir_path+filename, 'w') as f:
             json.dump(result, f)
 
 
-if __name__ == "__main__":
-    calc_all()
 

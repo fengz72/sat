@@ -1,5 +1,7 @@
 .idea/
 sat/data
+sat/test
+sat/test.yaml
 
 satviz/data
 satviz/test

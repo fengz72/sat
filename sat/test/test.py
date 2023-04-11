@@ -211,7 +211,6 @@ def test_json():
     with open(fileName, 'w') as f:
         json.dump(data, f)
 
-import numpy as np
 from datetime import datetime, timedelta
 from sat.tool.time_tools import get_ts_from_time
 def test_czml():
@@ -291,6 +290,7 @@ def test_czml():
 
     ## 遍历所有卫星, 并生成packet
     for key, sat in sat_dict.items():
+        print(f'{datetime.now().isoformat()}  正在计算{key}')
         show_path = False
         show_label = False
         if key.split('_')[1] == '1':
@@ -381,8 +381,11 @@ def test_czml():
         }
         tempCZML.append(initialCZMLProps)
 
-    fileName = 'sat.czml'
-    with open(fileName, 'w') as f:
+    dir_path = '../data/test/'
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    filename = 'sat.czml'
+    with open(dir_path+filename, 'w') as f:
         json.dump(tempCZML, f)
 
 def test_gs_to_sat():
@@ -453,13 +456,13 @@ def calc_shortest_path(graph : networkx.Graph, source, dest, t:skyfield.api.Time
 
     count = 0
     path = []
-    if nx.has_path(graph, source=source, dest=dest):
+    if nx.has_path(graph, source=source, target=dest):
         p1 = nx.dijkstra_path(graph, source=source, target=dest)
         for node in p1:
             if type(node) == Satellite:
                 count += 1
             path.append(node.name)
-        p2 = nx.dijkstra_path_length(graph, source=source, dest=dest)
+        p2 = nx.dijkstra_path_length(graph, source=source, target=dest)
 
         result['path'] = path
         result['sat num'] = count
@@ -467,14 +470,14 @@ def calc_shortest_path(graph : networkx.Graph, source, dest, t:skyfield.api.Time
 
     return result
 
-def test_calc_json():
+def test_calc_json(conf_path='../conf.yaml'):
     # TODO: 时间有可能是多段的, 不能简单的排序
     with open('../data/2023-03-31_11-13-37/beijing China to London UK.json') as f:
         data = json.load(f)
 
     result = []
 
-    # 对结果进行排序并分组
+    # 对结果进行排序并按照路径分组
     groups = itertools.groupby(sorted(data, key=lambda x: x['path']), key=lambda x: x['path'])
     for key, group in groups:
         temp = {
@@ -486,11 +489,11 @@ def test_calc_json():
 
         start = group_list[0]['time']
 
-        # 修正时间, 使结束时间无下一个开始时间衔接
+        # 修正时间, 使结束时间与下一个开始时间衔接
         end = group_list[-1]['time']
         end_iso = end.replace('Z', '')
         end_time = datetime.fromisoformat(end_iso)
-        conf = get_yaml('../conf.yaml')
+        conf = get_yaml(conf_path)
         timescale = conf['timescale']
         delta = timedelta(milliseconds=timescale)
         end = (end_time + delta).isoformat()
@@ -500,7 +503,7 @@ def test_calc_json():
         result.append(temp)
 
     dir_path = '../data/test/'
-    if os.path.exists(dir_path):
+    if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     filename = 'path.json'
 
@@ -515,7 +518,12 @@ def create_line_czml():
     for d in data:
         path = d['path']
 
-
+def test_os():
+    dir_path = '../data/2023-04-10_09-15-11/'
+    for dirpath, dirnames, filenames in os.walk(dir_path):
+        for filename in filenames:
+            if filename.endswith('.json'):
+                pass
 
 
 if __name__ == '__main__':
@@ -525,5 +533,6 @@ if __name__ == '__main__':
     # test_0()
     # test_sort()
     # test_json()
-    test_czml()
+    # test_czml()
     # test_calc_json()
+    test_os()

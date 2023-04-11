@@ -1,5 +1,4 @@
-from datetime import datetime
-
+import arrow
 import networkx
 import networkx as nx
 import skyfield.api
@@ -8,7 +7,7 @@ from sat.tool.distance_tools import get_distance_between_two_sat
 
 
 def create_topo(sat_dict, gs_list, t:skyfield.api.Time) -> networkx.Graph:
-    print(f'{datetime.now().isoformat()}  开始生成图: {t.utc_iso()}')
+    print(f'{arrow.now().isoformat()}  开始生成图: {t.utc_iso()}')
     G = nx.Graph()
     G.add_nodes_from(sat_dict.values())
     G.add_nodes_from(gs_list)
