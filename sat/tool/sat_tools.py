@@ -104,6 +104,43 @@ def get_all_sat_from_scratch(num_orbits,
             sat_dict[sat_name] = sat
     return sat_dict
 
+def get_all_sat_for_ns3(num_orbits,
+                             num_sats_per_orbits,
+                             f,
+                             jd,
+                             fr,
+                             ecco,
+                             argpo,
+                             inclo,
+                             mean_motion_loop_per_day):
+    """
+    得到所有的卫星对象, 以字典返回. key: (num_orbit)_(num_sat_on_orbit)
+    :param num_orbits:
+    :param num_sats_per_orbits:
+    :param f: 相位
+    :param jd: julian日期
+    :param fr: julian日期小数部分
+    :param ecco: 离心率
+    :param argpo: 近地点辐角
+    :param inclo: 轨道倾角
+    :param mean_motion_loop_per_day: 卫星每天运动圈数
+    :return: sat_dict
+    """
+    sat_dict = {}
+    ts = load.timescale()
+    for i in range(1, num_orbits + 1):
+        for j in range(1, num_sats_per_orbits + 1):
+            sat_name = str(i) + '_' + str(j)
+            sat_num = i * num_sats_per_orbits + j
+            # print(f"{sat_name}: ")
+            satrec = get_one_satrec_from_scratch(num_orbits, num_sats_per_orbits, i, j, f,
+                                                 jd, fr, ecco, argpo, inclo, mean_motion_loop_per_day)
+
+            skyfield_sat = EarthSatellite.from_satrec(satrec, ts)
+            sat = Satellite(sat_name, satrec, skyfield_sat, num_orbits, num_sats_per_orbits, f)
+            sat_dict[sat_num] = sat
+    return sat_dict
+
 def auto_get_sat_dict(file_path='../conf.yaml'):
     """
     根据配置文件自动生成星座

@@ -17,7 +17,7 @@ num_sats_per_orbits: 22
 f: 1
 
 # epoch, 默认为startTime
-epoch: 2023-3-1 00:00:00
+epoch: 2023-9-1 00:00:00
 # 离心率
 ecco: 0.0001
 # 近地点辐角

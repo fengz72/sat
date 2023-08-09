@@ -30,8 +30,8 @@ let height = [550 * 1000, 550 * 1000, 24.5];
 function getData() {
     // fetch('http://127.0.0.1:5500/data/beijing China to London UK/2023-03-01 00-00-57.json')
     // fetch('http://127.0.0.1:5500/data/beijing China to London UK/2023-03-01 00-00-58.json')
-    // fetch('http://127.0.0.1:55001/data/beijing China to Hainan China/2023-03-01 00-00-57.json')
-    fetch('http://127.0.0.1:5500/data/beijing China to Hainan China/2023-03-01 00-00-58.json')
+    fetch('http://127.0.0.1:55001/data/beijing China to Hainan China/2023-03-01 00-00-57.json')
+    // fetch('http://127.0.0.1:5500/data/beijing China to Hainan China/2023-03-01 00-00-58.json')
         .then(function (response) {
             if (response.ok) {
                 return response.text();

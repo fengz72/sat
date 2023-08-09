@@ -22,6 +22,15 @@ class Satellite(object):
         gcrs = self.sat.at(t)
         return gcrs.frame_xyz(itrs).km
 
+    def get_xyz_m(self, t):
+        """
+        计算t时刻itrs坐标系下的坐标, 单位: m
+        :param t: 时间: skyfield.timelib.Time
+        :return: (x, y, n): ndarray
+        """
+        gcrs = self.sat.at(t)
+        return gcrs.frame_xyz(itrs).m
+
     def get_xyz_eci(self, t):
         """
         计算惯性系下的位置

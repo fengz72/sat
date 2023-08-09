@@ -3,6 +3,8 @@ from datetime import datetime
 import numpy as np
 import arrow
 
+ts = load.timescale()
+
 def get_time_from_iso(iso_str):
     return datetime.strptime(iso_str, '%Y-%m-%dT%H:%M:%SZ')
 
@@ -16,7 +18,7 @@ def get_std_from_iso(iso_str):
     return datetime.strptime(iso_str, '%Y-%m-%dT%H:%M:%SZ').strftime('%Y-%m-%d %H:%M:%S')
 
 def get_ts_from_time(dt):
-    ts = load.timescale()
+
     return ts.utc(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
 
 def get_ts_from_std(std_str):
@@ -25,8 +27,10 @@ def get_ts_from_std(std_str):
     return get_ts_from_time(dt)
 
 def get_ts_from_iso(iso_str):
-    dt = get_time_from_iso(iso_str)
-    return get_ts_from_time(dt)
+    # dt = get_time_from_iso(iso_str)
+    # return get_ts_from_time(dt)
+    t_arr = arrow.get(iso_str)
+    return ts.from_datetime(t_arr)
 
 def get_ts_array_from_std(start_std : str, end_std : str, timescale):
     start_time = get_time_from_std(start_std)
@@ -48,7 +52,6 @@ def get_ts_array_from_iso(start_iso: str, end_iso: str, timescale):
     start_arrow = arrow.get(start_iso)
     end_arrow = arrow.get(end_iso)
 
-    ts = load.timescale()
 
     ts_array = ts.from_datetimes(
         [s[0] for s in arrow.Arrow.interval(frame, start_arrow, end_arrow, timescale, exact=True)])
@@ -57,8 +60,8 @@ def get_ts_array_from_iso(start_iso: str, end_iso: str, timescale):
 
 def get_julian_from_std(std_str):
     """得到julian的JDN和分数, JD = jd + fr"""
-    ts = get_ts_from_std(std_str)
-    return ts.whole, ts.tt_fraction
+    t_sky = get_ts_from_std(std_str)
+    return t_sky.whole, t_sky.tt_fraction
 
 def get_julian_from_time(date_time):
     """
@@ -71,6 +74,12 @@ def get_julian_from_time(date_time):
     fr = t.tt_fraction
     return jd, fr
 
+def get_julian_from_iso(s: str):
+    t_arr = arrow.get(s)
+    t_sky = ts.from_datetime(t_arr)
+    return t_sky.whole, t_sky.ut1_fraction;
+
 if __name__ == "__main__":
     a = get_ts_array_from_std('2023-3-1 00:00:00', '2023-3-1 00:04:59', 1000)
+
     print(a)
