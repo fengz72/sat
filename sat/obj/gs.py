@@ -1,4 +1,5 @@
 from skyfield.api import wgs84
+import numpy as np
 
 class GroundStation:
     def __init__(self, name, lat, lon, height, degree, sat_dict):
@@ -28,6 +29,36 @@ class GroundStation:
         if len(link_sat) != 0:
             linked_sat = min(zip(link_sat.values(), link_sat.keys()))
         return linked_sat
+    def shortest_link_sat_random(self, t, error, right_sat):
+        min_dis = 1e9
+        name = ''
+        gs_pos = self.gs.itrs_xyz.m
+        for key, sat in self.sat_dict.items():
+            sat_pos = sat.get_xyz_random(t, error)
+            dis = np.linalg.norm(gs_pos - sat_pos)
+            if dis < min_dis and self.orbit_delta(key, right_sat):
+                min_dis = dis
+                name = key
+        return name
+
+    def orbit_delta(self, key1, key2):
+        orbit1 = int(key1.split('_')[0])
+        orbit2 = int(key2.split('_')[0])
+
+        lat = self.sat_dict['1_1'].num_orbits
+        return abs(orbit1 - orbit2) <= lat / 2
+
+    def shortest_link_sat(self, t):
+        min_dis = 1e9
+        name = ''
+        gs_pos = self.gs.itrs_xyz.m
+        for key, sat in self.sat_dict.items():
+            sat_pos = sat.get_xyz_m(t)
+            dis = np.linalg.norm(gs_pos - sat_pos)
+            if dis < min_dis:
+                min_dis = dis
+                name = key
+        return name
 
     def get_blh(self):
         """

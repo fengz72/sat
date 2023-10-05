@@ -17,7 +17,7 @@ num_sats_per_orbits: 22
 f: 1
 
 # epoch, 默认为startTime
-epoch: 2023-3-1 00:00:00
+epoch: 2023-9-1 00:00:00
 # 离心率
 ecco: 0.0001
 # 近地点辐角
@@ -26,6 +26,8 @@ argpo: 90
 mean_motion_loop_per_day: 15.06
 
 gs:
-  - beijing China 39.905556 116.424722 43.5 10
-  - London UK 52.000 0.0 24.0 10
+  - beijing China 39.905556 116.424722 43.5 40
+  - London UK 52.000 0.0 24.0 40
+  - Singapore Singapore 1.0 104.0 15 40
+  - Cape_of_Good_Hope The_Republic_of_South_Africa -34.356944 18.497500 100.0 40
 

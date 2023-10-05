@@ -1,5 +1,6 @@
 from skyfield.framelib import itrs
 from skyfield.api import wgs84
+import numpy as np
 
 class Satellite(object):
     def __init__(self, sat_name, satrec, skyfield_sat, num_orbits, num_sats_per_orbits, f):
@@ -19,8 +20,8 @@ class Satellite(object):
         :param t: 时间: skyfield.timelib.Time
         :return: (x, y, n): ndarray
         """
-        gcrs = self.sat.at(t)
-        return gcrs.frame_xyz(itrs).km
+        position = self.sat.at(t)
+        return position.frame_xyz(itrs).km
 
     def get_xyz_m(self, t):
         """
@@ -28,15 +29,25 @@ class Satellite(object):
         :param t: 时间: skyfield.timelib.Time
         :return: (x, y, n): ndarray
         """
-        gcrs = self.sat.at(t)
-        return gcrs.frame_xyz(itrs).m
+        position = self.sat.at(t)
+        return position.frame_xyz(itrs).m
+
+    def get_xyz_random(self, t, error):
+        error = error / 100.0
+        position = self.sat.at(t)
+        loc = position.frame_xyz(itrs).m
+        for i in range(0, 3):
+            delta = np.random.uniform(-error, error)
+            loc[i] = loc[i] * (1 + delta)
+
+        return loc
 
     def get_xyz_eci(self, t):
         """
         计算惯性系下的位置
         """
-        gcrs = self.sat.at(t)
-        return gcrs.position.m
+        position = self.sat.at(t)
+        return position.position.m
 
     def get_blh(self, t):
         """
@@ -44,9 +55,9 @@ class Satellite(object):
         :param t: 时间: skyfield.timelib.Time
         :return: (lat: Angle, lon: Angle, height: Distance): tuple
         """
-        gcrs = self.sat.at(t)
-        lat, lon = wgs84.latlon_of(gcrs)
-        height = wgs84.height_of(gcrs)
+        position = self.sat.at(t)
+        lat, lon = wgs84.latlon_of(position)
+        height = wgs84.height_of(position)
         return lat, lon, height
 
     def get_intra_sats(self, t):
